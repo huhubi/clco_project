@@ -2,50 +2,19 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width">
-    <title>Simple Roulette</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roulette Game</title>
 </head>
 <body>
-    <h1>Roulette Game</h1>
-    <form method="POST">
-        <p>
-            <label for="bet_type">Choose a bet type:</label><br>
-            <select name="bet_type" id="bet_type" onchange="updateBetOptions()">
-                <option value="number">Number</option>
-                <option value="color">Color</option>
-            </select>
-        </p>
+    <h1>Welcome to the Roulette Game!</h1>
+    <form action="/play" method="post">
+        <label for="bet_number">Choose a number to bet on (0-36):</label>
+        <input type="number" name="bet_number" id="bet_number" min="0" max="36" required><br><br>
 
-        <p id="numberBet">
-            <label for="bet_value_number">Enter a number (0-36):</label><br>
-            <input type="text" id="bet_value_number" name="bet_value">
-        </p>
+        <label for="bet_amount">Bet Amount:</label>
+        <input type="number" name="bet_amount" id="bet_amount" min="1" required><br><br>
 
-        <p id="colorBet" style="display:none;">
-            <label for="bet_value_color">Choose a color:</label><br>
-            <select id="bet_value_color" name="bet_value">
-                <option value="red">Red</option>
-                <option value="black">Black</option>
-            </select>
-        </p>
-
-        <input type="submit" value="Spin the wheel">
+        <input type="submit" value="Place Bet">
     </form>
-
-    <script>
-        function updateBetOptions() {
-            var betType = document.getElementById('bet_type').value;
-            var numberBet = document.getElementById('numberBet');
-            var colorBet = document.getElementById('colorBet');
-
-            if (betType === 'number') {
-                numberBet.style.display = 'block';
-                colorBet.style.display = 'none';
-            } else {
-                numberBet.style.display = 'none';
-                colorBet.style.display = 'block';
-            }
-        }
-    </script>
 </body>
 </html>
