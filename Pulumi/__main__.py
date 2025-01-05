@@ -12,9 +12,9 @@ azure_location = config.get("azure-native:location") or "uksouth"
 
 # Repositories for the Flask web apps
 repo_urls = [
-    config.get("my:repoUrl1") or "https://github.com/huhubi/clco_project/tree/main/Roulette/evenuneven",
-    config.get("my:repoUrl2") or "https://github.com/huhubi/clco_project/tree/main/Roulette/numbers",
-    config.get("my:repoUrl3") or "https://github.com/huhubi/clco_project/tree/main/Roulette/redblack"
+    config.get("my:repoUrl1") or "https://github.com/huhubi/roulettenumbers",
+    config.get("my:repoUrl2") or "https://github.com/huhubi/roulettethirdsbet",
+    config.get("my:repoUrl3") or "https://github.com/huhubi/rouletteredblack"
 ]
 branches = [
     config.get("my:branch1") or "main",
