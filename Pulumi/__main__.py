@@ -31,14 +31,6 @@ resource_group = resources.ResourceGroup('ProjectResourceGroup',
     location=azure_location
 )
 
-# Use random strings to give the Webapp unique DNS names
-webapp_name_label1 = random_string.RandomString(
-    "flaskwebapp-",  # Prefix for the random string
-    length=8,  # Length of the random string
-    upper=False,  # Use lowercase letters
-    special=False,  # Do not use special characters
-).result.apply(lambda result: f"{web_app_1}-{result}")  # Format the result with the web app name
-
 # Virtual Network
 virtual_network = network.VirtualNetwork('virtualNetwork',
     resource_group_name=resource_group.name,  # Name of the resource group
@@ -87,6 +79,8 @@ app_service_plan = web.AppServicePlan('appServicePlan',
     kind='linux',
     reserved=True
 )
+
+
 
 # Web App
 web_app_1 = web.WebApp('webApp1',
@@ -191,6 +185,205 @@ source_control_3 = web_app_3.name.apply(lambda name: azure_native.web.WebAppSour
 opts=pulumi.ResourceOptions(depends_on=[web_app_2])
                                         ))
 
+
+
+# Create a Network Security Group
+network_security_group = azure_native.network.NetworkSecurityGroup("nsg",
+    resource_group_name=resource_group.name,
+    network_security_group_name=resource_group.name.apply(lambda name: f"{name}-nsg"))
+
+# Allow inbound traffic on port 80
+security_rule = azure_native.network.SecurityRule("allow80InboundRule",
+    resource_group_name=resource_group.name,
+    network_security_group_name=network_security_group.name,
+    security_rule_name="Allow-80-Inbound",
+    priority=110,
+    direction="Inbound",
+    access="Allow",
+    protocol="Tcp",
+    source_port_range="*",
+    destination_port_range="80",
+    source_address_prefix="*",
+    destination_address_prefix="*")
+
+# Create a Public IP Address
+public_ip = azure_native.network.PublicIPAddress("publicIp",
+    resource_group_name=resource_group.name,
+    public_ip_address_name="RoulettePublicIP",
+    sku=azure_native.network.PublicIPAddressSkuArgs(name="Standard"),
+    public_ip_allocation_method="Static",
+    dns_settings=azure_native.network.PublicIPAddressDnsSettingsArgs(
+        domain_name_label="roulettetableselector"
+    ),
+    zones=["1", "2", "3"])
+
+# Create a Load Balancer
+load_balancer = azure_native.network.LoadBalancer("loadBalancer",
+    resource_group_name=resource_group.name,
+    load_balancer_name="RouletteLoadBalancer",
+    sku=azure_native.network.LoadBalancerSkuArgs(name="Standard"),
+    frontend_ip_configurations=[azure_native.network.FrontendIPConfigurationArgs(
+        name="myFrontEnd",
+        public_ip_address=azure_native.network.PublicIPAddressArgs(
+            id=public_ip.id
+        )
+    )],
+    backend_address_pools=[azure_native.network.BackendAddressPoolArgs(name="myBackEndPool")],
+    probes=[azure_native.network.ProbeArgs(
+        name="httpProbe",
+        protocol="Http",
+        port=80,
+        request_path="/",
+        interval_in_seconds=15,
+        number_of_probes=2
+    )],
+    load_balancing_rules=[azure_native.network.LoadBalancingRuleArgs(
+        name="httpRule",
+        frontend_ip_configuration=azure_native.network.SubResourceArgs(
+            id=f"/subscriptions/{pulumi.Config().require('subscription_id')}/resourceGroups/ProjectResourceGroup/providers/Microsoft.Network/loadBalancers/RouletteLoadBalancer/frontendIPConfigurations/myFrontEnd"
+        ),
+        backend_address_pool=azure_native.network.SubResourceArgs(
+            id=f"/subscriptions/{pulumi.Config().require('subscription_id')}/resourceGroups/ProjectResourceGroup/providers/Microsoft.Network/loadBalancers/RouletteLoadBalancer/backendAddressPools/myBackEndPool"
+        ),
+        probe=azure_native.network.SubResourceArgs(
+            id=f"/subscriptions/{pulumi.Config().require('subscription_id')}/resourceGroups/ProjectResourceGroup/providers/Microsoft.Network/loadBalancers/RouletteLoadBalancer/probes/httpProbe"
+        ),
+        protocol="Tcp",
+        frontend_port=80,
+        backend_port=80,
+        enable_floating_ip=False,
+        idle_timeout_in_minutes=4,
+        load_distribution="Default"
+    )])
+
+nic_subnet = network.Subnet('nicSubnet',
+    resource_group_name=resource_group.name,
+    virtual_network_name=virtual_network.name,
+    subnet_name='nicSubnet',
+    address_prefix='10.0.2.0/24'
+)
+
+# Update Network Interfaces to use the new subnet
+nic1 = azure_native.network.NetworkInterface("nic1",
+    resource_group_name=resource_group.name,
+    network_interface_name=resource_group.name.apply(lambda name: f"roulette-nic1"),
+    ip_configurations=[azure_native.network.NetworkInterfaceIPConfigurationArgs(
+        name="ipconfig1",
+        subnet=azure_native.network.SubnetArgs(
+            id=nic_subnet.id
+        ),
+        private_ip_allocation_method="Dynamic",
+        load_balancer_backend_address_pools=[azure_native.network.SubResourceArgs(
+            id=load_balancer.backend_address_pools[0].id
+        )]
+    )],
+    network_security_group=azure_native.network.SubResourceArgs(id=network_security_group.id))
+
+nic2 = azure_native.network.NetworkInterface("nic2",
+    resource_group_name=resource_group.name,
+    network_interface_name=resource_group.name.apply(lambda name: f"{name}-nic2"),
+    ip_configurations=[azure_native.network.NetworkInterfaceIPConfigurationArgs(
+        name="ipconfig1",
+        subnet=azure_native.network.SubnetArgs(
+            id=nic_subnet.id
+        ),
+        private_ip_allocation_method="Dynamic",
+        load_balancer_backend_address_pools=[azure_native.network.SubResourceArgs(
+            id=load_balancer.backend_address_pools[0].id
+        )]
+    )],
+    network_security_group=azure_native.network.SubResourceArgs(id=network_security_group.id))
+
+# Create vm1
+vm_name1 = resource_group.name.apply(lambda name: f"{name}-vm1")
+vm1 = azure_native.compute.VirtualMachine("vm1",
+    resource_group_name=resource_group.name,
+    vm_name=vm_name1,
+    network_profile=azure_native.compute.NetworkProfileArgs(
+        network_interfaces=[azure_native.compute.NetworkInterfaceReferenceArgs(
+            id=nic1.id
+        )]
+    ),
+    hardware_profile=azure_native.compute.HardwareProfileArgs(vm_size="Standard_B2ts_v2"),
+    storage_profile=azure_native.compute.StorageProfileArgs(
+        os_disk=azure_native.compute.OSDiskArgs(create_option="FromImage"),
+        image_reference=azure_native.compute.ImageReferenceArgs(
+            publisher="Canonical",
+            offer="0001-com-ubuntu-server-jammy",
+            sku="22_04-lts",
+            version="latest"
+        )
+    ),
+    os_profile=azure_native.compute.OSProfileArgs(
+        computer_name="vm1",
+        admin_username="azureuser",
+        admin_password="GanzGeheim123!"
+    ))
+
+vm1_extension = azure_native.compute.VirtualMachineExtension("vm1Extension",
+    resource_group_name=resource_group.name,
+    vm_name=vm1.name,
+    vm_extension_name="installNginx",
+    publisher="Microsoft.Azure.Extensions",
+    type="CustomScript",
+    type_handler_version="2.1",
+    auto_upgrade_minor_version=True,
+    settings={
+        "commandToExecute": "sudo apt-get update && sudo apt-get install -y nginx && "
+                            "echo '<head><title>table selector 1</title></head><body><h1>Roulette table selector</h1><ul>"
+        "<li><a href="'https://rouletteflaskwebapp1.azurewebsites.net'">redblack table</a></li>"
+        "<li><a href="'https://rouletteflaskwebapp2.azurewebsites.net'">numbers table</a></li>"
+        "<li><a href="'https://rouletteflaskwebapp3.azurewebsites.net'">thirds table</a></li>"
+    "</ul></body>' | sudo tee /var/www/html/index.nginx-debian.html &&"
+                            "sudo systemctl restart nginx"
+    })
+
+# Create vm2
+vm_name2 = resource_group.name.apply(lambda name: f"{name}-vm2")
+vm2 = azure_native.compute.VirtualMachine("vm2",
+    resource_group_name=resource_group.name,
+    vm_name=vm_name2,
+    network_profile=azure_native.compute.NetworkProfileArgs(
+        network_interfaces=[azure_native.compute.NetworkInterfaceReferenceArgs(
+            id=nic2.id
+        )]
+    ),
+    hardware_profile=azure_native.compute.HardwareProfileArgs(vm_size="Standard_B2ts_v2"),
+    storage_profile=azure_native.compute.StorageProfileArgs(
+        os_disk=azure_native.compute.OSDiskArgs(create_option="FromImage"),
+        image_reference=azure_native.compute.ImageReferenceArgs(
+            publisher="Canonical",
+            offer="0001-com-ubuntu-server-jammy",
+            sku="22_04-lts",
+            version="latest"
+        )
+    ),
+    os_profile=azure_native.compute.OSProfileArgs(
+        computer_name="vm2",
+        admin_username="azureuser",
+        admin_password="GanzGeheim123!"
+    ))
+
+vm2_extension = azure_native.compute.VirtualMachineExtension("vm2Extension",
+    resource_group_name=resource_group.name,
+    vm_name=vm2.name,
+    vm_extension_name="installNginx",
+    publisher="Microsoft.Azure.Extensions",
+    type="CustomScript",
+    type_handler_version="2.1",
+    auto_upgrade_minor_version=True,
+    settings={
+        "commandToExecute": "sudo apt-get update && sudo apt-get install -y nginx && "
+                            "echo '<head><title>table selector 2</title></head><body><h1>Roulette table selector</h1><body><h1>Web Portal</h1><ul>"
+        "<li><a href="'https://rouletteflaskwebapp1.azurewebsites.net'">redblack table</a></li>"
+        "<li><a href="'https://rouletteflaskwebapp2.azurewebsites.net'">numbers table</a></li>"
+        "<li><a href="'https://rouletteflaskwebapp3.azurewebsites.net'">thirds table</a></li>"
+    "</ul></body>' | sudo tee /var/www/html/index.nginx-debian.html &&"
+                            "sudo systemctl restart nginx"
+    })
+
+# Export the public IP address
+
 # Create a budget for the specified resource group
 budget = resource_group.name.apply(lambda rg_name: consumption.Budget(
     resource_name="Project-Budget",  # Name of the budget resource
@@ -223,7 +416,6 @@ budget = resource_group.name.apply(lambda rg_name: consumption.Budget(
 ))
 
 
-# Export the Web App hostname as a Markdown link
-pulumi.export("hostname", pulumi.Output.concat("[Web App](http://", web_app_1.default_host_name, ")"))
-pulumi.export("hostname", pulumi.Output.concat("[Web App](http://", web_app_2.default_host_name, ")"))
-pulumi.export("hostname", pulumi.Output.concat("[Web App](http://", web_app_3.default_host_name, ")"))
+# Export the Table Selector as a Markdown link
+pulumi.export("dnsName", public_ip.dns_settings.apply(lambda dns: dns.fqdn))
+pulumi.export("dnsName", pulumi.Output.concat("[Table Selector](http://", public_ip.dns_settings.apply(lambda dns: dns.fqdn), ")"))
