@@ -51,4 +51,12 @@ Repeat for second and third repository with the following Repository Links
 - [Thirds](https://github.com/huhubi/roulettethirdsbet)
 
 
+### Notes
+
+Multiple App Service Instances of a webapp can be checked with the command
+```bash
+ az webapp list-instances --resource-group ProjectResourceGroup --name rouletteflaskwebapp1
+```
+
+![image](https://github.com/user-attachments/assets/0bbed306-f9d8-44e3-bf79-3b2b4827ddb4)
 
