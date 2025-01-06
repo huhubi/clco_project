@@ -330,10 +330,10 @@ vm1_extension = azure_native.compute.VirtualMachineExtension("vm1Extension",
     auto_upgrade_minor_version=True,
     settings={
         "commandToExecute": "sudo apt-get update && sudo apt-get install -y nginx && "
-                            "echo '<head><title>table selector 1</title></head><body><h1>Roulette table selector</h1><ul>"
-        "<li><a href="'https://rouletteflaskwebapp1.azurewebsites.net'">redblack table</a></li>"
-        "<li><a href="'https://rouletteflaskwebapp2.azurewebsites.net'">numbers table</a></li>"
-        "<li><a href="'https://rouletteflaskwebapp3.azurewebsites.net'">thirds table</a></li>"
+                            "echo '<head><title>Roulette Spiele 1</title></head><body><h1>Roulette Spielauswahl</h1><ul>"
+      "<li><a href="'https://rouletteflaskwebapp1.azurewebsites.net'">rot/schwarz</a></li>"
+        "<li><a href="'https://rouletteflaskwebapp2.azurewebsites.net'">Zahlen</a></li>"
+        "<li><a href="'https://rouletteflaskwebapp3.azurewebsites.net'">Drittel</a></li>"
     "</ul></body>' | sudo tee /var/www/html/index.nginx-debian.html &&"
                             "sudo systemctl restart nginx"
     })
@@ -374,10 +374,10 @@ vm2_extension = azure_native.compute.VirtualMachineExtension("vm2Extension",
     auto_upgrade_minor_version=True,
     settings={
         "commandToExecute": "sudo apt-get update && sudo apt-get install -y nginx && "
-                            "echo '<head><title>table selector 2</title></head><body><h1>Roulette table selector</h1><body><ul>"
-        "<li><a href="'https://rouletteflaskwebapp1.azurewebsites.net'">redblack table</a></li>"
-        "<li><a href="'https://rouletteflaskwebapp2.azurewebsites.net'">numbers table</a></li>"
-        "<li><a href="'https://rouletteflaskwebapp3.azurewebsites.net'">thirds table</a></li>"
+                            "echo '<head><title>Roulette Spiele 2</title></head><body><h1>Roulette Spielauswahl</h1><body><ul>"
+        "<li><a href="'https://rouletteflaskwebapp1.azurewebsites.net'">rot/schwarz</a></li>"
+        "<li><a href="'https://rouletteflaskwebapp2.azurewebsites.net'">Zahlen</a></li>"
+        "<li><a href="'https://rouletteflaskwebapp3.azurewebsites.net'">Drittel</a></li>"
     "</ul></body>' | sudo tee /var/www/html/index.nginx-debian.html &&"
                             "sudo systemctl restart nginx"
     })
