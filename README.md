@@ -1,6 +1,6 @@
 
 
-# CLCO roulette project at FHTW - Deployment notes / procedure
+# CLCO group B4 roulette project at FHTW - Deployment notes / procedure
 
 **Authors:** Gregoire Bartek / Matthias Huber  
 **Date:** January 6, 2025  
