@@ -374,7 +374,7 @@ vm2_extension = azure_native.compute.VirtualMachineExtension("vm2Extension",
     auto_upgrade_minor_version=True,
     settings={
         "commandToExecute": "sudo apt-get update && sudo apt-get install -y nginx && "
-                            "echo '<head><title>table selector 2</title></head><body><h1>Roulette table selector</h1><body><h1>Web Portal</h1><ul>"
+                            "echo '<head><title>table selector 2</title></head><body><h1>Roulette table selector</h1><body><ul>"
         "<li><a href="'https://rouletteflaskwebapp1.azurewebsites.net'">redblack table</a></li>"
         "<li><a href="'https://rouletteflaskwebapp2.azurewebsites.net'">numbers table</a></li>"
         "<li><a href="'https://rouletteflaskwebapp3.azurewebsites.net'">thirds table</a></li>"
@@ -417,5 +417,4 @@ budget = resource_group.name.apply(lambda rg_name: consumption.Budget(
 
 
 # Export the Table Selector as a Markdown link
-pulumi.export("dnsName", public_ip.dns_settings.apply(lambda dns: dns.fqdn))
-pulumi.export("dnsName", pulumi.Output.concat("[Table Selector](http://", public_ip.dns_settings.apply(lambda dns: dns.fqdn), ")"))
+pulumi.export("URL", pulumi.Output.concat("[Table Selector](http://", public_ip.dns_settings.apply(lambda dns: dns.fqdn), ")"))
