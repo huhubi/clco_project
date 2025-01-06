@@ -331,7 +331,7 @@ vm1_extension = azure_native.compute.VirtualMachineExtension("vm1Extension",
     settings={
         "commandToExecute": "sudo apt-get update && sudo apt-get install -y nginx && "
                             "echo '<head><title>Roulette Spiele 1</title></head><body><h1>Roulette Spielauswahl</h1><ul>"
-      "<li><a href="'https://rouletteflaskwebapp1.azurewebsites.net'">rot/schwarz</a></li>"
+      "<li><a href="'https://rouletteflaskwebapp1.azurewebsites.net'">Rot/Schwarz</a></li>"
         "<li><a href="'https://rouletteflaskwebapp2.azurewebsites.net'">Zahlen</a></li>"
         "<li><a href="'https://rouletteflaskwebapp3.azurewebsites.net'">Drittel</a></li>"
     "</ul></body>' | sudo tee /var/www/html/index.nginx-debian.html &&"
@@ -375,7 +375,7 @@ vm2_extension = azure_native.compute.VirtualMachineExtension("vm2Extension",
     settings={
         "commandToExecute": "sudo apt-get update && sudo apt-get install -y nginx && "
                             "echo '<head><title>Roulette Spiele 2</title></head><body><h1>Roulette Spielauswahl</h1><body><ul>"
-        "<li><a href="'https://rouletteflaskwebapp1.azurewebsites.net'">rot/schwarz</a></li>"
+        "<li><a href="'https://rouletteflaskwebapp1.azurewebsites.net'">Rot/Schwarz</a></li>"
         "<li><a href="'https://rouletteflaskwebapp2.azurewebsites.net'">Zahlen</a></li>"
         "<li><a href="'https://rouletteflaskwebapp3.azurewebsites.net'">Drittel</a></li>"
     "</ul></body>' | sudo tee /var/www/html/index.nginx-debian.html &&"
