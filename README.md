@@ -24,7 +24,7 @@ Since deploying web apps via Pulumi lead to errors, the deployment of the Roulet
 
 - [rouletteflaskwebapp1.azurewebsites.net](https://rouletteflaskwebapp1.azurewebsites.net) this one hosts the color roulette game:
 - Navigate to Deployment Center in the WebApp View:
-![image](https://github.com/user-attachments/assets/2c38f818-d330-4340-b492-07c40ccb1e06)
+  ![image](https://github.com/user-attachments/assets/2c38f818-d330-4340-b492-07c40ccb1e06)
 
 - Select external git as deployment method and add repository link:
   ![image](https://github.com/user-attachments/assets/b6d55741-c266-48bd-8571-7ac71b1c61c2)
@@ -33,13 +33,18 @@ Since deploying web apps via Pulumi lead to errors, the deployment of the Roulet
   ![image](https://github.com/user-attachments/assets/70e212ab-f2f9-490c-a95f-2a38950a2483)
 
 - After some minutes, the webapp is deployed (for progress one can check the deployment logs):
-![image](https://github.com/user-attachments/assets/7020b578-2fcc-4c9a-b931-541d03c1ed38)
+  ![image](https://github.com/user-attachments/assets/7020b578-2fcc-4c9a-b931-541d03c1ed38)
 
 ## 4. Check functionality:
 
 - Access [Roulette table selector](http://roulettetableselector.uksouth.cloudapp.azure.com/) in browser
+  
 - Click on [Rot/Schwarz](https://rouletteflaskwebapp1.azurewebsites.net/)
-  ![image](https://github.com/user-attachments/assets/1a0bd45d-3438-4ce8-92e4-5be3a60928a0)
+
+- Enjoy gambling away!
+
+![image](https://github.com/user-attachments/assets/1a0bd45d-3438-4ce8-92e4-5be3a60928a0)
+  
 
 Repeat for second and third repository with the following Repository Links
 - [Numbers](https://github.com/huhubi/roulettenumbers)
